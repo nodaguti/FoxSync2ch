@@ -1,0 +1,141 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://mozapps/content/preferences/preferences.css"?>
+<?xml-stylesheet href="chrome://browser/skin/preferences/preferences.css"?>
+
+<prefwindow id="sync2chPrefs"
+            xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+            windowtype="FoxSync2ch:Options"
+            title="FoxSync2ch - Settings"
+            buttons="accept,cancel"
+            style="min-width: 38em;">
+
+	<script type="application/javascript">
+	<![CDATA[
+
+	const prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefService).getBranch('extensions.sync2ch.');
+
+	function openTab(url){
+		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+					.getService(Components.interfaces.nsIWindowMediator);
+		var mainWindow = wm.getMostRecentWindow("navigator:browser");
+		mainWindow.gBrowser.selectedTab = mainWindow.gBrowser.addTab(url);
+	}
+
+	function resetSyncNum(){
+		var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+							.getService(Components.interfaces.nsIPromptService);
+		var comformMsg = '本当に同期番号をリセットしますか?\n次回の同期は「マージ」の動作となります.';
+		var result = promptService.confirm(window, 'FoxSync2ch:Confirm', comformMsg);
+
+		if(result){
+			prefs.setIntPref('sync_number', 0);
+			promptService.alert(window, 'FoxAge2ch:Alert', '同期番号をリセットしました.');
+		}
+	}
+
+	function checkUpdate(){
+		var gExtensionManager = Components.classes["@mozilla.org/extensions/manager;1"]
+								.getService(Components.interfaces.nsIExtensionManager);
+		var nowVersion = gExtensionManager.getItemForID('cwh@software.2ch.net').version;
+	
+		var req = new XMLHttpRequest();
+		req.open('GET', 'http://bbs2ch.sourceforge.jp/uploader/upload.php?page=all', false);
+		req.send(null);
+		var version = req.responseText.match(/Chaika\s*Write\s*Helper\s*(\d\.\d\.\d)/);
+		if(!version){
+			return alert('Access Error');
+		}
+		var tmp1 = version[1].split('.');
+		tmp2 = nowVersion.split('.');
+
+		for(let i=0;i<tmp1.length;i++){
+			if(tmp1[i] > tmp2[i]){
+				var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+									.getService(Components.interfaces.nsIPromptService);
+				var comformMsg = 'アップデートが見つかりました\n'
+								+'配布ページを開きますか(新規タブで開かれます)?\n\n'
+								+'現在のバージョン: '+nowVersion+'\n'
+								+'更新後のバージョン: '+version[1];
+				var result = promptService.confirm(window, 'Chaika Write Helper', comformMsg);
+
+				if(result) openTab('http://bbs2ch.sourceforge.jp/uploader/upload.php?page=all');
+				return;
+			}
+		}
+		alert('お使いのSync2chは最新です');
+	}
+	//]]>
+	</script>
+
+	<prefpane id="pane1" label="設定" flex="1">
+		<preferences>
+			<preference id="extensions.sync2ch.account.id" name="extensions.sync2ch.account.id" type="string" />
+			<preference id="extensions.sync2ch.account.password" name="extensions.sync2ch.account.password" type="string" />
+			<preference id="extensions.sync2ch.sync.favorite" name="extensions.sync2ch.sync.favorite" type="bool" />
+			<preference id="extensions.sync2ch.sync.open" name="extensions.sync2ch.sync.open" type="bool" />
+			<preference id="add_board_as_favorite" name="extensions.sync2ch.add_board_as_favorite" type="bool" />
+			<preference id="sync_when_foxage2ch_updated" name="extensions.sync2ch.sync_when_foxage2ch_updated" type="bool" />
+			<preference id="reload_updated_threads" name="extensions.sync2ch.reload_updated_threads" type="bool" />
+			<!-- preference id="backup_before_sync" name="extensions.sync2ch.backup_before_sync" type="bool" / -->
+			<preference id="set_nownum_to_readnum" name="extensions.sync2ch.set_nownum_to_readnum" type="bool" />
+			<preference id="preserve_original_opening_url" name="extensions.sync2ch.preserve_original_opening_url" type="bool" />
+			<preference id="apply_line_number_change" name="extensions.sync2ch.apply_line_number_change" type="bool" />
+			<preference id="notify_through_foxage2ch" name="extensions.sync2ch.notify_through_foxage2ch" type="bool" />
+			<preference id="disable_syncing_opening_boards" name="extensions.sync2ch.disable_syncing_opening_boards" type="bool" />
+		</preferences>
+
+		<label value="各設定の詳細については ReadMe.txt を参照して下さい." />
+
+		<groupbox>
+			<caption label="アカウント" />
+			<hbox>
+				<label value="ID:" />
+				<textbox id="mail" preference="extensions.sync2ch.account.id" flex="1" />
+			</hbox>
+			<hbox>
+				<label value="Password:" />
+				<textbox id="password" preference="extensions.sync2ch.account.password" type="password" flex="1" />
+			</hbox>
+		</groupbox>
+
+		<groupbox>
+			<caption label="同期対象" />
+			<checkbox preference="extensions.sync2ch.sync.favorite" label="お気に入り(FoxAge2chに登録されているスレッド)" />
+			<checkbox preference="extensions.sync2ch.sync.open" label="開いているスレッド" />
+		</groupbox>
+
+		<groupbox>
+			<caption label="同期オプション(送信)" />
+			<checkbox preference="sync_when_foxage2ch_updated" label="FoxAge2chが更新した時に同期する"
+						tooltiptext="チェックを外すと手動によってのみ同期するようになります" />
+			<checkbox preference="add_board_as_favorite" label="FoxAge2chの板をお気に入りとして追加する"
+						tooltiptext="「お気に入りの板」フォルダに板一覧を追加します" />
+			<checkbox preference="set_nownum_to_readnum" label="「現在読んでいるレス番号」を「既読のレス番号」にする"
+						tooltiptext="OFFにした場合, 現在読んでいるレス番号は同期されなくなります" />
+			<checkbox preference="disable_syncing_opening_boards" label="開いている板を同期しない"
+						tooltiptext="「板」をタブで開けないクライアント(Jane Styleなど)で同期が失敗する場合, ONにすると解消することがあります." />
+			<checkbox preference="preserve_original_opening_url" label="開いているスレッド/板のオリジナルのURLを保存する"
+						tooltiptext="http://127.0.0.1:8080/... などを補正しないようにします. 他のクライアントで問題が発生する可能性があります." />
+			<!--checkbox preference="backup_before_sync" label="同期前にFoxAge2chのデータをバックアップする" /-->
+		</groupbox>
+
+		<groupbox>
+			<caption label="同期オプション(受信)" />
+			<checkbox preference="reload_updated_threads" label="更新されたスレッドを再読み込みする" />
+			<checkbox preference="apply_line_number_change" label="未読/既読数を反映させる" 
+						tooltiptext="bbs2chreader/chaikaのdatデータは更新されないので, 表示されるデータが不正確になる可能性があります" />
+		</groupbox>
+
+		<groupbox>
+			<caption label="その他" />
+			<checkbox preference="notify_through_foxage2ch" label="同期状況をFoxAge2chを通じて通知する" />
+		</groupbox>
+
+		<hbox>
+			<button label="同期番号をリセットする" oncommand="resetSyncNum()" style="width: 12em; max-width: 12em;" />
+			<!--button label="更新チェック" oncommand="checkUpdate();" style="width:10em;max-width:10em;" /-->
+		</hbox>
+	</prefpane>
+</prefwindow>

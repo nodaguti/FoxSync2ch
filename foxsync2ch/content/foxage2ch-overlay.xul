@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+
+<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+    <script type="application/javascript"><![CDATA[
+        var Sync2chOverlay = {
+            init: function(){
+                var parent = document.querySelector('#mainToolbar > toolbarbutton[type="menu"] > menupopup');
+
+                var menu = document.createElement('menu');
+                menu.setAttribute('id', 'sync2chMenu');
+                menu.setAttribute('label', 'FoxSync2ch');
+
+                var menupopup = document.createElement('menupopup');
+
+                var startSyncMenu = document.createElement('menuitem');
+                startSyncMenu.setAttribute('label', 'Sync2chで同期');
+                startSyncMenu.addEventListener('command', this.startSync2ch, false);
+
+                var prefMenu = document.createElement('menuitem');
+                prefMenu.setAttribute('label', '設定');
+                prefMenu.addEventListener('command', this.openPrefs, false);
+
+                var menuseparator = document.createElement('menuseparator');
+
+                var openWebPage = document.createElement('menuitem');
+                openWebPage.setAttribute('label', 'Sync2chのサイトを開く');
+                openWebPage.addEventListener('label', this.openWebPage, false);
+
+                [startSyncMenu, prefMenu, menuseparator, openWebPage].forEach(function(item){
+                    menupopup.appendChild(item);
+                });
+
+                menu.appendChild(menupopup);
+                parent.appendChild(menu);
+            },
+
+            startSync2ch: function(){
+                var scope = {};
+                Components.utils.import("resource://sync2ch/Sync2chCore.js", scope);
+
+                scope.Sync2chCore.sync();
+            },
+
+            openPrefs: function(){
+                window.openDialog(
+                    "chrome://sync2ch/content/prefs.xul", "FoxSync2ch:Options",
+                    "chrome,titlebar,toolbar,centerscreen,dialog=no"
+                );
+            },
+
+            openWebPage: function(){
+                FoxAge2chUtils.loadURL('https://sync2ch.com/', true);
+            }
+        }
+
+        Sync2chOverlay.init();
+    ]]></script>
+
+</overlay>

@@ -1,0 +1,8 @@
+content sync2ch content/
+resource sync2ch modules/
+overlay chrome://foxage2ch/content/foxage2ch.xul chrome://sync2ch/content/foxage2ch-overlay.xul
+
+#Component refistration
+component {1C15B29E-52F0-11DE-9836-8EA256D83056} components/Sync2chService.js
+contract @software.2ch.net/sync2ch-service;1 {1C15B29E-52F0-11DE-9836-8EA256D83056}
+category profile-after-change Sync2chService @software.2ch.net/sync2ch-service;1
