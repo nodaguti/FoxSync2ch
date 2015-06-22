@@ -1,5 +1,7 @@
 # FoxSync2ch
 
+Download: uploder
+
 ## 概要
 
 FoxAge2chのデータをSync2chで同期できるようにするアドオンです.
