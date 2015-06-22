@@ -1,6 +1,6 @@
 # FoxSync2ch
 
-Download: uploder
+Download: [uploader](http://bbs2ch.osdn.jp/uploader/upload.php?page=all)
 
 ## 概要
 
